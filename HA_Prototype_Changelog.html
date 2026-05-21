@@ -1,0 +1,904 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Home Assistant 2026.5 Patch Notes</title>
+
+  <style>
+    :root {
+      --text: #1f2933;
+      --muted: #667085;
+      --bg: #ffffff;
+      --soft-bg: #f7f9fb;
+      --accent: #0b7285;
+      --row-hover: rgba(11, 114, 133, 0.10);
+      --group-bg: rgba(11, 114, 133, 0.055);
+      --group-hover: rgba(11, 114, 133, 0.14);
+      --link: #0969da;
+      --border: #d0d5dd;
+      --badge-most: rgba(11, 114, 133, 0.14);
+      --badge-overkiz: rgba(102, 112, 133, 0.16);
+      --badge-other: rgba(52, 64, 84, 0.10);
+      --badge-dependency: rgba(250, 176, 5, 0.20);
+    }
+
+    body {
+      margin: 0;
+      padding: 2rem;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.45;
+    }
+
+    main {
+      max-width: 1450px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0 0 0.5rem;
+      font-size: 2rem;
+      line-height: 1.2;
+    }
+
+    h2 {
+      margin-top: 2.25rem;
+      margin-bottom: 0.35rem;
+      font-size: 1.35rem;
+    }
+
+    p {
+      color: var(--muted);
+      margin-top: 0;
+    }
+
+    a {
+      color: var(--link);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border: none;
+      table-layout: fixed;
+      margin-bottom: 1.5rem;
+    }
+
+    th,
+    td {
+      border: none;
+      padding: 0.65rem 0.75rem;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    thead th {
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      background: var(--soft-bg);
+    }
+
+    .summary-table {
+      table-layout: auto;
+      margin-top: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .sortable th {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .sortable th:hover {
+      color: var(--accent);
+    }
+
+    .sortable th::after {
+      content: " ↕";
+      color: #98a2b3;
+      font-weight: normal;
+    }
+
+    .sortable th.sorted-asc::after {
+      content: " ↑";
+      color: var(--accent);
+    }
+
+    .sortable th.sorted-desc::after {
+      content: " ↓";
+      color: var(--accent);
+    }
+
+    .patch-table tbody tr.group-shade {
+      background: var(--group-bg);
+    }
+
+    .patch-table tbody tr:hover {
+      background: var(--row-hover);
+    }
+
+    .patch-table tbody tr.group-shade:hover {
+      background: var(--group-hover);
+    }
+
+    .version,
+    .date {
+      white-space: nowrap;
+      font-weight: 600;
+    }
+
+    .release-meta {
+      margin: 0 0 0.75rem;
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .area {
+      font-weight: 600;
+    }
+
+    .contributor,
+    .pr {
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 0.84rem;
+    }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      background: #eef2f6;
+      padding: 0.1rem 0.25rem;
+      border-radius: 0.25rem;
+    }
+
+    .controls {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      margin: 1rem 0 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: none;
+      background: var(--accent);
+      color: white;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.45rem;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    button:hover:not(:disabled) {
+      filter: brightness(0.95);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      background: #e4e7ec;
+      color: #98a2b3;
+    }
+
+    #resetAll {
+      min-width: 4.5rem;
+    }
+
+    #searchBox {
+      width: 420px;
+      max-width: 100%;
+      padding: 0.5rem 0.65rem;
+      border: 1px solid var(--border);
+      border-radius: 0.45rem;
+      font: inherit;
+    }
+
+    .count-note {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .segmented-control {
+      display: inline-flex;
+      border: 1px solid var(--border);
+      border-radius: 0.55rem;
+      overflow: hidden;
+      background: white;
+    }
+
+    .segmented-control button {
+      background: white;
+      color: var(--muted);
+      border-radius: 0;
+      padding: 0.48rem 0.75rem;
+    }
+
+    .segmented-control button.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.75rem;
+      margin: 0.75rem 0 2rem;
+    }
+
+    .summary-card {
+      background: var(--soft-bg);
+      border-radius: 0.75rem;
+      padding: 0.9rem 1rem;
+    }
+
+    .summary-card h3 {
+      margin: 0 0 0.5rem;
+      font-size: 1rem;
+    }
+
+    .summary-card ol {
+      margin: 0;
+      padding-left: 1.35rem;
+    }
+
+    .summary-card li {
+      margin: 0.25rem 0;
+      color: var(--muted);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 0.18rem 0.55rem;
+      font-size: 0.78rem;
+      font-weight: 650;
+      line-height: 1.25;
+      white-space: nowrap;
+    }
+
+    .badge-most-relevant-changes {
+      background: var(--badge-most);
+      color: #075867;
+    }
+
+    .badge-overkiz-fixes {
+      background: var(--badge-overkiz);
+      color: #344054;
+    }
+
+    .badge-other-fixes {
+      background: var(--badge-other);
+      color: #344054;
+    }
+
+    .badge-dependency-updates {
+      background: var(--badge-dependency);
+      color: #7a4b00;
+    }
+
+    /* Detailed mode column order:
+       1. Change
+       2. Integration / Area
+       3. Category
+       4. Contributor
+       5. PR
+    */
+    .patch-table th:nth-child(1),
+    .patch-table td:nth-child(1) {
+      width: 52%;
+      line-height: 1.35;
+    }
+
+    .patch-table th:nth-child(2),
+    .patch-table td:nth-child(2) {
+      width: 16%;
+    }
+
+    .patch-table th:nth-child(3),
+    .patch-table td:nth-child(3) {
+      width: 14%;
+    }
+
+    .patch-table th:nth-child(4),
+    .patch-table td:nth-child(4) {
+      width: 11%;
+    }
+
+    .patch-table th:nth-child(5),
+    .patch-table td:nth-child(5) {
+      width: 7%;
+    }
+
+    .patch-table td.pr,
+    .patch-table td:nth-child(5) {
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      line-height: 1.35;
+    }
+
+    .patch-table td.contributor,
+    .patch-table td:nth-child(4) {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .patch-table td.category,
+    .patch-table td.area {
+      white-space: normal;
+      overflow-wrap: break-word;
+    }
+
+    body.compact-mode .patch-table th:nth-child(4),
+    body.compact-mode .patch-table td:nth-child(4),
+    body.compact-mode .patch-table th:nth-child(5),
+    body.compact-mode .patch-table td:nth-child(5) {
+      display: none;
+    }
+
+    body.compact-mode .patch-table th:nth-child(1),
+    body.compact-mode .patch-table td:nth-child(1) {
+      width: 62%;
+    }
+
+    body.compact-mode .patch-table th:nth-child(2),
+    body.compact-mode .patch-table td:nth-child(2) {
+      width: 20%;
+    }
+
+    body.compact-mode .patch-table th:nth-child(3),
+    body.compact-mode .patch-table td:nth-child(3) {
+      width: 18%;
+    }
+
+    @media (max-width: 900px) {
+      body {
+        padding: 1rem;
+      }
+
+      table {
+        font-size: 0.9rem;
+      }
+
+      th,
+      td {
+        padding: 0.5rem;
+      }
+
+      .patch-table th:nth-child(1),
+      .patch-table td:nth-child(1) {
+        width: 45%;
+      }
+
+      .patch-table th:nth-child(2),
+      .patch-table td:nth-child(2) {
+        width: 17%;
+      }
+
+      .patch-table th:nth-child(3),
+      .patch-table td:nth-child(3) {
+        width: 16%;
+      }
+
+      .patch-table th:nth-child(4),
+      .patch-table td:nth-child(4) {
+        width: 12%;
+      }
+
+      .patch-table th:nth-child(5),
+      .patch-table td:nth-child(5) {
+        width: 10%;
+      }
+    }
+  </style>
+</head>
+
+<body class="detailed-mode">
+<main>
+  <h1>Home Assistant 2026.5 Patch Notes</h1>
+  <p>Human-readable summary and sortable detailed changelog for Home Assistant 2026.5 patch releases.</p>
+
+  <h2>Quick summary</h2>
+
+  <table class="summary-table">
+    <thead>
+      <tr>
+        <th>Version</th>
+        <th>Date</th>
+        <th>Main focus</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="version">2026.5.1</td>
+        <td class="date">May 8</td>
+        <td>WiZ, Overkiz, Z-Wave/ZHA, setup fixes</td>
+      </tr>
+      <tr>
+        <td class="version">2026.5.2</td>
+        <td class="date">May 15</td>
+        <td>MQTT, Matter, Duco, Shelly, HomeMatic IP Cloud</td>
+      </tr>
+      <tr>
+        <td class="version">2026.5.3</td>
+        <td class="date">May 19</td>
+        <td>Automations, Utility Meter, Google Assistant, ZHA, Overkiz</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Contributor summary</h2>
+  <div class="summary-grid" id="contributorSummary"></div>
+
+  <div class="controls">
+    <div class="segmented-control" aria-label="View mode">
+      <button type="button" id="compactView">Compact</button>
+      <button type="button" id="detailedView" class="active">Detailed</button>
+    </div>
+    <button type="button" id="resetAll" title="Clear filter and restore default order" disabled>Reset</button>
+    <input type="search" id="searchBox" placeholder="Filter all tables by integration, contributor, PR, or text">
+    <span class="count-note" id="countNote"></span>
+  </div>
+
+  <section id="releaseTables"></section>
+</main>
+
+<script>
+  const releases = [
+    {
+      version: "2026.5.1",
+      date: "May 8",
+      items: [
+        { c: "Most relevant changes", a: "WiZ", ch: "Added wfsens as an occupancy source.", u: "th3spis", pr: 166799 },
+        { c: "Most relevant changes", a: "WiZ", ch: "Fixed WiZ Light config flow timeout by properly closing UDP connections.", u: "robwasripped", pr: 168456 },
+        { c: "Other fixes", a: "IntelliFire", ch: "Fixed IntelliFire setup recovery.", u: "jeeftor", pr: 169739 },
+        { c: "Other fixes", a: "Supervisor", ch: "Fixed hassio auth IndexError on Supervisor Unix socket requests.", u: "agners", pr: 169911 },
+        { c: "Dependency updates", a: "Gardena BLE", ch: "Updated gardena ble to 2.8.1.", u: "elupus", pr: 169914 },
+        { c: "Dependency updates", a: "serialx", ch: "Updated serialx to 1.7.1.", u: "puddly", pr: 169928 },
+        { c: "Dependency updates", a: "holidays", ch: "Updated holidays to 0.96.", u: "gjohansson-ST", pr: 169939 },
+        { c: "Other fixes", a: "Todo", ch: "Added support for options to todo triggers.", u: "emontnemery", pr: 169947 },
+        { c: "Dependency updates", a: "pyTibber", ch: "Updated pyTibber to 0.37.5.", u: "Danielhiversen", pr: 169981 },
+        { c: "Dependency updates", a: "python-duco-client", ch: "Updated python-duco-client to 0.4.0.", u: "ronaldvdmeer", pr: 169776 },
+        { c: "Dependency updates", a: "python-duco-client", ch: "Updated python-duco-client to 0.4.1.", u: "ronaldvdmeer", pr: 169991 },
+        { c: "Other fixes", a: "FRITZ!Box Tools", ch: "Improved handling of malformed data during FRITZ!Box Tools setup.", u: "mib1185", pr: 170030 },
+        { c: "Other fixes", a: "Axis", ch: "Fixed websocket certificate verification and updated Axis to v70.", u: "Kane610", pr: 170038 },
+        { c: "Most relevant changes", a: "Overkiz", ch: "Fixed is_closed state for DynamicGarageDoor.", u: "iMicknl", pr: 170052 },
+        { c: "Most relevant changes", a: "Overkiz", ch: "Fixed tilt controls for TiltOnlyVenetianBlind.", u: "iMicknl", pr: 170055 },
+        { c: "Most relevant changes", a: "Overkiz", ch: "Fixed cover controls for UpDownBioclimaticPergola.", u: "iMicknl", pr: 170058 },
+        { c: "Dependency updates", a: "pyOverkiz", ch: "Updated pyOverkiz to 1.20.3.", u: "iMicknl", pr: 170060 },
+        { c: "Dependency updates", a: "deebot-client", ch: "Updated deebot-client to 18.3.0.", u: "edenhaus", pr: 170066 },
+        { c: "Most relevant changes", a: "Overkiz", ch: "Set is_closed state to None when a cover state returns unknown.", u: "iMicknl", pr: 170081 },
+        { c: "Most relevant changes", a: "Overkiz", ch: "Fixed sensors getting wrong unit from MeasuredValueType attribute.", u: "iMicknl", pr: 170088 },
+        { c: "Most relevant changes", a: "Z-Wave", ch: "Fixed Z-Wave discovery crash with unknown node firmware version.", u: "TheJulianJES", pr: 170090 },
+        { c: "Most relevant changes", a: "ZHA", ch: "Updated ZHA to 1.3.1.", u: "TheJulianJES", pr: 170095 },
+        { c: "Dependency updates", a: "python-bsblan", ch: "Updated python-bsblan to 5.2.1.", u: "liudger", pr: 170100 },
+        { c: "Dependency updates", a: "blebox_uniapi", ch: "Updated blebox_uniapi to v2.5.3.", u: "bkobus-bbx", pr: 170115 },
+        { c: "Most relevant changes", a: "Overkiz", ch: "Fixed is_closed state for DynamicGate covers.", u: "iMicknl", pr: 170130 },
+        { c: "Most relevant changes", a: "Overkiz", ch: "Fixed tilt support for UpDownVenetianBlind.", u: "iMicknl", pr: 170047 }
+      ]
+    },
+    {
+      version: "2026.5.2",
+      date: "May 15",
+      items: [
+        { c: "Other fixes", a: "LG ThinQ", ch: "Fixed ValueError for non-numeric value.", u: "LG-ThinQ-Integration", pr: 166300 },
+        { c: "Other fixes", a: "SmartThings", ch: "Only uses SmartThings switch for light when appropriate.", u: "r2xj", pr: 166424 },
+        { c: "Other fixes", a: "Comelit", ch: "Fixed non-unique ID issue.", u: "chemelli74", pr: 169756 },
+        { c: "Other fixes", a: "ZBT", ch: "Migrated ZBT-1 and ZBT-2 to use serial number for unique ID.", u: "puddly", pr: 169879 },
+        { c: "Dependency updates", a: "afsapi", ch: "Updated afsapi to 1.0.1.", u: "wlcrs", pr: 170073 },
+        { c: "Most relevant changes", a: "Overkiz", ch: "Fixed local API incorrectly marking devices as unavailable.", u: "iMicknl", pr: 170118 },
+        { c: "Most relevant changes", a: "HomeMatic IP Cloud", ch: "Fixed config entry setup crash after migration to 2026.5.0.", u: "lackas", pr: 170156 },
+        { c: "Other fixes", a: "HomeMatic IP Cloud", ch: "Fixed HmIP-FLC lock state polarity.", u: "lackas", pr: 170159 },
+        { c: "Other fixes", a: "Serial", ch: "Set serial port description from description, not product.", u: "puddly", pr: 170160 },
+        { c: "Other fixes", a: "Vodafone Station", ch: "Reinitialized API on stale sessions.", u: "chemelli74", pr: 170190 },
+        { c: "Most relevant changes", a: "MQTT", ch: "Fixed device discovery not using shared QoS and encoding options.", u: "jbouwh", pr: 170195 },
+        { c: "Other fixes", a: "UptimeRobot", ch: "Fixed entity refresh.", u: "chemelli74", pr: 170217 },
+        { c: "Most relevant changes", a: "Duco", ch: "Added target flow level and mode end time sensors.", u: "ronaldvdmeer", pr: 169298 },
+        { c: "Most relevant changes", a: "Duco", ch: "Added system health platform.", u: "ronaldvdmeer", pr: 169517 },
+        { c: "Most relevant changes", a: "Duco", ch: "Added API version to diagnostics for support triage.", u: "ronaldvdmeer", pr: 169802 },
+        { c: "Dependency updates", a: "python-duco-client", ch: "Updated python-duco-client to 0.4.2.", u: "ronaldvdmeer", pr: 170027 },
+        { c: "Dependency updates", a: "python-duco-client", ch: "Updated python-duco-client to 0.5.0.", u: "ronaldvdmeer", pr: 170065 },
+        { c: "Other fixes", a: "BSB-LAN", ch: "Handled empty heating circuits.", u: "liudger", pr: 170249 },
+        { c: "Other fixes", a: "State", ch: "Does not forget segments from state when a new config arrives.", u: "Hypfer", pr: 170265 },
+        { c: "Dependency updates", a: "imgw-pib", ch: "Updated imgw-pib to 2.1.2.", u: "bieniu", pr: 170274 },
+        { c: "Other fixes", a: "iAquaLink", ch: "Set system-specific polling interval.", u: "flz", pr: 170279 },
+        { c: "Dependency updates", a: "renault-api", ch: "Updated renault-api to 0.5.8.", u: "thargy", pr: 170309 },
+        { c: "Other fixes", a: "Backup", ch: "Fixed hassio.backup_partial AttributeError when folders are specified.", u: "agners", pr: 170312 },
+        { c: "Most relevant changes", a: "Shelly", ch: "Fixed media player availability.", u: "bieniu", pr: 170319 },
+        { c: "Other fixes", a: "Debouncer", ch: "Cancelled previous Debouncer timer handle in _schedule_timer.", u: "raman325", pr: 170339 },
+        { c: "Dependency updates", a: "axis", ch: "Updated Axis to v71.", u: "Kane610", pr: 170347 },
+        { c: "Other fixes", a: "Doorbell", ch: "Fixed duplicate doorbell events when entity becomes unavailable.", u: "jbouwh", pr: 170354 },
+        { c: "Dependency updates", a: "serialx", ch: "Updated serialx to 1.7.2.", u: "PBrunot", pr: 170272 },
+        { c: "Dependency updates", a: "serialx", ch: "Updated serialx to 1.7.3.", u: "puddly", pr: 170368 },
+        { c: "Dependency updates", a: "pyintesishome", ch: "Updated pyintesishome to 1.8.7.", u: "jnimmo", pr: 170382 },
+        { c: "Other fixes", a: "Energy", ch: "Applied unit_of_measurement to energy combined power sensor.", u: "MindFreeze", pr: 170404 },
+        { c: "Dependency updates", a: "pymiele", ch: "Updated pymiele to 0.6.2.", u: "astrandb", pr: 170419 },
+        { c: "Dependency updates", a: "aioesphomeapi", ch: "Updated aioesphomeapi to 44.24.1.", u: "bdraco", pr: 170428 },
+        { c: "Most relevant changes", a: "Matter", ch: "Fixed fractional setpoints in Matter climate not rounded.", u: "TheJulianJES", pr: 170442 },
+        { c: "Other fixes", a: "InfluxDB", ch: "Fixed InfluxDB reconfigure for v1 configuration.", u: "RobBie1221", pr: 170448 },
+        { c: "Dependency updates", a: "aioharmony", ch: "Updated aioharmony to 1.0.3.", u: "bdraco", pr: 170459 },
+        { c: "Other fixes", a: "WebDAV", ch: "Increased WebDAV client timeout from 10 to 30 seconds.", u: "Croydon", pr: 170476 },
+        { c: "Other fixes", a: "MQTT", ch: "Fixed device subentry settings not being recalled when reconfiguring a device.", u: "jbouwh", pr: 170484 },
+        { c: "Other fixes", a: "Workday", ch: "Added missing optional category strings.", u: "gjohansson-ST", pr: 170505 },
+        { c: "Dependency updates", a: "frontend", ch: "Updated frontend to 20260429.4.", u: "bramkragten", pr: 170567 },
+        { c: "Most relevant changes", a: "Duco", ch: "Migrated Duco to python-duco-connectivity and removed temperature sensors.", u: "ronaldvdmeer", pr: 170237 },
+        { c: "Dependency updates", a: "python-duco-connectivity", ch: "Updated python-duco-connectivity to 0.4.0.", u: "ronaldvdmeer", pr: 170661 }
+      ]
+    },
+    {
+      version: "2026.5.3",
+      date: "May 19",
+      items: [
+        { c: "Dependency updates", a: "qbittorrent-api", ch: "Updated qbittorrent-api to 2026.5.1.", u: "lumatijev", pr: 170181 },
+        { c: "Other fixes", a: "iAquaLink", ch: "Improved 429 handling.", u: "flz", pr: 170231 },
+        { c: "Other fixes", a: "Apple TV", ch: "Fixed keyboard focus binary_sensor missing on cold start.", u: "kroehre", pr: 170360 },
+        { c: "Overkiz fixes", a: "Overkiz", ch: "Added tilt controls for UpDownSheerScreen.", u: "dankarization", pr: 170563 },
+        { c: "Other fixes", a: "BleBox", ch: "Fixed light temperature scaling.", u: "bkobus-bbx", pr: 170573 },
+        { c: "Other fixes", a: "BleBox", ch: "Fixed ValueError when turning on light with brightness set to 0.", u: "bkobus-bbx", pr: 170769 },
+        { c: "Dependency updates", a: "aiodns", ch: "Updated aiodns to 4.0.3.", u: "bdraco", pr: 170865 },
+        { c: "Other fixes", a: "CalDAV", ch: "Populated uid and recurrence_id in calendar events.", u: "frenck", pr: 170910 },
+        { c: "Overkiz fixes", a: "Overkiz", ch: "Fixed is_closed state for SlidingDiscreteGateWithPedestrianPosition covers.", u: "iMicknl", pr: 170913 },
+        { c: "Other fixes", a: "USB discovery", ch: "Disabled USB discovery for teleinfo.", u: "puddly", pr: 170933 },
+        { c: "Most relevant changes", a: "Utility Meter", ch: "Fixed utility meter next_reset shifting forward on entity rename.", u: "frenck", pr: 170957 },
+        { c: "Other fixes", a: "Utility Meter", ch: "Used correct state_class for utility meters with unsupported total_increasing device classes.", u: "frenck", pr: 170962 },
+        { c: "Most relevant changes", a: "GoodWe", ch: "Reduced connect retries to avoid blocking startup.", u: "frenck", pr: 170964 },
+        { c: "Overkiz fixes", a: "Overkiz", ch: "Fixed is_closed state for DiscretePositionableGarageDoor.", u: "iMicknl", pr: 170981 },
+        { c: "Overkiz fixes", a: "Overkiz", ch: "Fixed controls for OpenCloseGate4T.", u: "iMicknl", pr: 170987 },
+        { c: "Most relevant changes", a: "Google Assistant", ch: "Prevented entity sync from blocking startup.", u: "frenck", pr: 170991 },
+        { c: "Other fixes", a: "Template", ch: "Loaded template extensions by class to prevent import deadlock.", u: "frenck", pr: 170995 },
+        { c: "Other fixes", a: "Emulated Hue", ch: "Used asyncio.get_running_loop() in emulated_hue UPnP responder.", u: "frenck", pr: 171000 },
+        { c: "Overkiz fixes", a: "Overkiz", ch: "Fixed Netatmo valve KeyError when hvac_action state is unavailable.", u: "frenck", pr: 171004 },
+        { c: "Most relevant changes", a: "Time triggers", ch: "Fixed time trigger crash when using entity_id dict format without offset.", u: "frenck", pr: 171006 },
+        { c: "Other fixes", a: "Threshold", ch: "Fixed threshold preview crash when hysteresis is not provided.", u: "frenck", pr: 171009 },
+        { c: "Other fixes", a: "Growatt", ch: "Fixed mix device IndexError when chart data is empty.", u: "frenck", pr: 171012 },
+        { c: "Other fixes", a: "SleepIQ", ch: "Fixed timer units for core climate and foot warmer.", u: "frenck", pr: 171013 },
+        { c: "Other fixes", a: "Control4", ch: "Fixed climate crash when humidity is Undefined.", u: "frenck", pr: 171015 },
+        { c: "Other fixes", a: "Manual Alarm Panel", ch: "Fixed crash on restore with invalid state.", u: "frenck", pr: 171016 },
+        { c: "Other fixes", a: "Daikin", ch: "Handled connection errors gracefully in coordinator.", u: "frenck", pr: 171017 },
+        { c: "Most relevant changes", a: "Automations", ch: "Fixed shorthand template conditions in choose blocks crashing all automations.", u: "frenck", pr: 171018 },
+        { c: "Overkiz fixes", a: "Overkiz", ch: "Added additional overrides to cover entity.", u: "iMicknl", pr: 171019 },
+        { c: "Other fixes", a: "Verisure", ch: "Fixed alarm crash when cloud rejects arm/disarm command.", u: "frenck", pr: 171024 },
+        { c: "Overkiz fixes", a: "Overkiz", ch: "Added stop command to pergola horizontal awning covers.", u: "frenck", pr: 171034 },
+        { c: "Most relevant changes", a: "WeatherFlow", ch: "Fixed websocket crash when data payload is None.", u: "frenck", pr: 171037 },
+        { c: "Dependency updates", a: "pyIntesishome", ch: "Updated pyIntesishome to 1.8.8.", u: "jnimmo", pr: 171041 },
+        { c: "Other fixes", a: "forked-daapd", ch: "Returned media_content_id as string.", u: "frenck", pr: 171059 },
+        { c: "Dependency updates", a: "aioimmich", ch: "Updated aioimmich to 0.14.1.", u: "mib1185", pr: 171138 },
+        { c: "Overkiz fixes", a: "Overkiz", ch: "Fixed controls for UpDownGarageDoor4T and additional 4T covers.", u: "iMicknl", pr: 171144 },
+        { c: "Most relevant changes", a: "ZHA", ch: "Fixed config entries using a URI without a port.", u: "puddly", pr: 171164 },
+        { c: "Overkiz fixes", a: "Overkiz", ch: "Fixed is_closed state and position for DynamicPergola covers.", u: "iMicknl", pr: 170983 },
+        { c: "Overkiz fixes", a: "Overkiz", ch: "Fixed tilt and position support for VenetianBlind covers.", u: "iMicknl", pr: 170974 }
+      ]
+    }
+  ];
+
+  const categoryOrder = {
+    "Most relevant changes": 10,
+    "Overkiz fixes": 20,
+    "Other fixes": 30,
+    "Dependency updates": 40
+  };
+
+  const releaseTables = document.getElementById("releaseTables");
+  const searchBox = document.getElementById("searchBox");
+  const resetAllButton = document.getElementById("resetAll");
+  const countNote = document.getElementById("countNote");
+  const contributorSummary = document.getElementById("contributorSummary");
+  const compactViewButton = document.getElementById("compactView");
+  const detailedViewButton = document.getElementById("detailedView");
+  const tableSortState = new WeakMap();
+  const groupableSortKeys = ["categoryOrder", "area", "contributor"];
+
+  function contributorUrl(username) {
+    return `https://github.com/${username}`;
+  }
+
+  function prUrl(prNumber) {
+    return `https://github.com/home-assistant/core/pull/${prNumber}`;
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function categoryClass(category) {
+    return "badge-" + category.toLowerCase().replaceAll(" ", "-");
+  }
+
+  function categoryBadge(category) {
+    return `<span class="badge ${categoryClass(category)}">${escapeHtml(category)}</span>`;
+  }
+
+  function categoryCounts(items) {
+    return items.reduce((counts, item) => {
+      counts[item.c] = (counts[item.c] || 0) + 1;
+      return counts;
+    }, {});
+  }
+
+  function formatReleaseCounts(items) {
+    const counts = categoryCounts(items);
+    const parts = Object.keys(categoryOrder)
+      .filter(category => counts[category])
+      .map(category => `${counts[category]} ${category.toLowerCase()}`);
+
+    return `${items.length} changes: ${parts.join(", ")}`;
+  }
+
+  function renderContributorSummary() {
+    const totals = new Map();
+
+    releases.flatMap(release => release.items).forEach(item => {
+      totals.set(item.u, (totals.get(item.u) || 0) + 1);
+    });
+
+    const topContributors = Array.from(totals.entries())
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .slice(0, 10);
+
+    contributorSummary.innerHTML = `
+      <div class="summary-card">
+        <h3>Top contributors</h3>
+        <ol>
+          ${topContributors.map(([username, count]) => `
+            <li><a href="${contributorUrl(username)}" rel="external nofollow">@${escapeHtml(username)}</a>: ${count}</li>
+          `).join("")}
+        </ol>
+      </div>
+      <div class="summary-card">
+        <h3>Category totals</h3>
+        <ol>
+          ${Object.keys(categoryOrder).map(category => {
+            const count = releases.flatMap(release => release.items).filter(item => item.c === category).length;
+            return `<li>${categoryBadge(category)} ${count}</li>`;
+          }).join("")}
+        </ol>
+      </div>
+    `;
+  }
+
+  function renderTables() {
+    releaseTables.innerHTML = releases.map(release => {
+      const rows = release.items.map((item, index) => {
+        const catOrder = categoryOrder[item.c] || 90;
+        const defaultOrder = `${String(catOrder).padStart(3, "0")}-${String(index + 1).padStart(3, "0")}`;
+
+        return `
+          <tr
+            data-default-order="${defaultOrder}"
+            data-category-order="${catOrder}"
+            data-area="${escapeHtml(item.a)}"
+            data-change="${escapeHtml(item.ch)}"
+            data-contributor="@${escapeHtml(item.u)}"
+            data-pr-number="${item.pr}"
+          >
+            <td>${escapeHtml(item.ch)}</td>
+            <td class="area">${escapeHtml(item.a)}</td>
+            <td class="category">${categoryBadge(item.c)}</td>
+            <td class="contributor"><a href="${contributorUrl(item.u)}" rel="external nofollow">@${escapeHtml(item.u)}</a></td>
+            <td class="pr"><a href="${prUrl(item.pr)}" rel="external nofollow">#${item.pr}</a></td>
+          </tr>
+        `;
+      }).join("");
+
+      return `
+        <h2>${release.version}</h2>
+        <p class="release-meta">${escapeHtml(formatReleaseCounts(release.items))}</p>
+        <table class="sortable patch-table" data-release="${release.version}">
+          <thead>
+            <tr>
+              <th data-sort-key="change">Change</th>
+              <th data-sort-key="area">Integration / Area</th>
+              <th data-sort-key="categoryOrder">Category</th>
+              <th data-sort-key="contributor">Contributor</th>
+              <th data-sort-key="prNumber">PR</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }).join("");
+  }
+
+  function getTables() {
+    return Array.from(document.querySelectorAll(".patch-table"));
+  }
+
+  function getRows(table) {
+    return Array.from(table.querySelectorAll("tbody tr"));
+  }
+
+  function allRows() {
+    return getTables().flatMap(table => getRows(table));
+  }
+
+  function getSortValue(row, key) {
+    if (key === "defaultOrder") return row.dataset.defaultOrder || "";
+
+    const value = row.dataset[key] || "";
+
+    if (key === "categoryOrder" || key === "prNumber") {
+      return Number(value) || 0;
+    }
+
+    return String(value).toLowerCase();
+  }
+
+  function getGroupValue(row, key) {
+    if (key === "categoryOrder") return row.dataset.categoryOrder || "";
+    if (key === "area") return row.dataset.area || "";
+    if (key === "contributor") return row.dataset.contributor || "";
+    return "";
+  }
+
+  function clearGroupShading(table) {
+    getRows(table).forEach(row => row.classList.remove("group-shade"));
+  }
+
+  function applyGroupShading(table, key) {
+    clearGroupShading(table);
+    if (!groupableSortKeys.includes(key)) return;
+
+    const visibleRows = getRows(table).filter(row => row.style.display !== "none");
+    let previousGroupValue = null;
+    let groupIndex = -1;
+
+    visibleRows.forEach(row => {
+      const currentGroupValue = getGroupValue(row, key);
+
+      if (currentGroupValue !== previousGroupValue) {
+        groupIndex += 1;
+        previousGroupValue = currentGroupValue;
+      }
+
+      if (groupIndex % 2 === 0) {
+        row.classList.add("group-shade");
+      }
+    });
+  }
+
+  function updateHeaderState(table, key, direction) {
+    const headers = table.querySelectorAll("th[data-sort-key]");
+
+    headers.forEach(header => {
+      header.classList.remove("sorted-asc", "sorted-desc");
+
+      if (header.dataset.sortKey === key) {
+        header.classList.add(direction === "asc" ? "sorted-asc" : "sorted-desc");
+      }
+    });
+  }
+
+  function sortTable(table, key, direction = "asc", shadeKey = key) {
+    const tbody = table.querySelector("tbody");
+    const rows = getRows(table);
+
+    rows.sort((a, b) => {
+      const aValue = getSortValue(a, key);
+      const bValue = getSortValue(b, key);
+
+      if (aValue < bValue) return direction === "asc" ? -1 : 1;
+      if (aValue > bValue) return direction === "asc" ? 1 : -1;
+
+      const aDefault = getSortValue(a, "defaultOrder");
+      const bDefault = getSortValue(b, "defaultOrder");
+
+      if (aDefault < bDefault) return -1;
+      if (aDefault > bDefault) return 1;
+      return 0;
+    });
+
+    rows.forEach(row => tbody.appendChild(row));
+    tableSortState.set(table, { key, direction, shadeKey });
+    updateHeaderState(table, key, direction);
+    applyGroupShading(table, shadeKey);
+    updateResetState();
+  }
+
+  function updateCountNote() {
+    const rows = allRows();
+    const visibleCount = rows.filter(row => row.style.display !== "none").length;
+    countNote.textContent = `${visibleCount} of ${rows.length} items shown`;
+  }
+
+  function isCustomSorted() {
+    return getTables().some(table => {
+      const state = tableSortState.get(table);
+      return state && !(state.key === "defaultOrder" && state.direction === "asc" && state.shadeKey === "categoryOrder");
+    });
+  }
+
+  function updateResetState() {
+    const hasFilter = searchBox.value.trim().length > 0;
+    resetAllButton.disabled = !hasFilter && !isCustomSorted();
+  }
+
+  function filterRows(query) {
+    const normalizedQuery = query.trim().toLowerCase();
+
+    getTables().forEach(table => {
+      getRows(table).forEach(row => {
+        const rowText = row.innerText.toLowerCase();
+        row.style.display = rowText.includes(normalizedQuery) ? "" : "none";
+      });
+
+      const currentState = tableSortState.get(table) || {
+        key: "defaultOrder",
+        direction: "asc",
+        shadeKey: "categoryOrder"
+      };
+
+      applyGroupShading(table, currentState.shadeKey);
+    });
+
+    updateCountNote();
+    updateResetState();
+  }
+
+  function setViewMode(mode) {
+    document.body.classList.toggle("compact-mode", mode === "compact");
+    document.body.classList.toggle("detailed-mode", mode === "detailed");
+    compactViewButton.classList.toggle("active", mode === "compact");
+    detailedViewButton.classList.toggle("active", mode === "detailed");
+  }
+
+  function initializeSorting() {
+    getTables().forEach(table => {
+      const headers = table.querySelectorAll("th[data-sort-key]");
+
+      headers.forEach(header => {
+        header.addEventListener("click", () => {
+          const key = header.dataset.sortKey;
+          const currentState = tableSortState.get(table) || {};
+          const direction = currentState.key === key && currentState.direction === "asc" ? "desc" : "asc";
+          const shadeKey = groupableSortKeys.includes(key) ? key : null;
+          sortTable(table, key, direction, shadeKey);
+          filterRows(searchBox.value);
+        });
+      });
+
+      sortTable(table, "defaultOrder", "asc", "categoryOrder");
+    });
+
+    updateCountNote();
+    updateResetState();
+  }
+
+  searchBox.addEventListener("input", event => {
+    filterRows(event.target.value);
+  });
+
+  resetAllButton.addEventListener("click", () => {
+    searchBox.value = "";
+
+    getTables().forEach(table => {
+      sortTable(table, "defaultOrder", "asc", "categoryOrder");
+    });
+
+    filterRows("");
+  });
+
+  compactViewButton.addEventListener("click", () => setViewMode("compact"));
+  detailedViewButton.addEventListener("click", () => setViewMode("detailed"));
+
+  renderContributorSummary();
+  renderTables();
+  initializeSorting();
+  setViewMode("detailed");
+</script>
+</body>
+</html>
