@@ -1,6 +1,15 @@
 # Improved Home Assistant ChangeLog
 A human-readable, sortable HTML prototype for improving Home Assistant patch release change logs while preserving contributor attribution and PR traceability.
 
+---
+
+### 🌐 URL
+
+Access it here:  
+https://blackrockcity.github.io/Improved-Home-Assistant-Change-Log/HA_Prototype_Changelog.html
+
+---
+
 # Prototype: Human-readable, sortable patch release changelog
 
 This prototype reimagines the existing Home Assistant patch release changelog from a linear bullet list into a structured, human-readable, sortable HTML presentation.
