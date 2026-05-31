@@ -1,4 +1,4 @@
-# Improved Home Assistant ChangeLog
+# Improved Home Assistant Changelog
 A human-readable, sortable HTML prototype for improving Home Assistant patch release change logs while preserving contributor attribution and PR traceability.
 
 ---
